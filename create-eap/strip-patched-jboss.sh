@@ -10,9 +10,9 @@ fi
 INSTALLATION_DIR="$JBOSS_DIR/.installation"
 BUNDLE_BASE_DIR="$JBOSS_DIR/bundles/system/layers/base"
 MODULE_BASE_DIR="$JBOSS_DIR/modules/system/layers/base"
-CURRENT_VERSION=`cat "$MODULE_BASE_DIR/.overlays/.overlays"`
+CURRENT_VERSION=$(cat "$MODULE_BASE_DIR/.overlays/.overlays")
 
-echo Stripping $JBOSS_DIR ...
+echo "Stripping $JBOSS_DIR ..."
 
 DIRS[0]=$MODULE_BASE_DIR
 
@@ -60,7 +60,7 @@ for dir in "${DIRS[@]}" ; do
 	done
 	
 	echo Cleaning up overlays
-	mv $dir/.overlays $dir/OVERLAYSXXX_DELETEME
+	mv "$dir/.overlays" "$dir/OVERLAYSXXX_DELETEME"
 done
 
 echo Cleaning up files
