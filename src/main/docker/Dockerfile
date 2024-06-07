@@ -1,20 +1,20 @@
 # Inspired by https://github.com/jboss-dockerfiles/wildfly/blob/master/Dockerfile
 FROM eclipse-temurin:11-ubi9-minimal
 
-ENV EAP_VERSION=${version.eap}
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
 
-# Starting on jdk 21 eclipse-temurin is based on ubi9-minimal version 9.3
-#   that doesn't includes shadow-utils package that provides groupadd & useradd commands
-# Conditional RUN: IF no groupadd AND microdnf THEN: update, install shadow-utils, clean
-RUN if ! [ -x "$(command -v groupadd)" ] && [ -x "$(command -v microdnf)" ]; then microdnf update -y && microdnf install --best --nodocs -y shadow-utils unzip && microdnf clean all; fi \
-  && if ! [ -x "$(command -v unzip)" ] && [ -x "$(command -v microdnf)" ]; then microdnf update -y && microdnf install --best --nodocs -y unzip && microdnf clean all; fi
+ENV EAP_VERSION=${version.eap}
+ENV JBOSS_HOME /opt/jboss/eap
 
 WORKDIR /opt/jboss
 
-RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && \
-    chmod 755 /opt/jboss
+COPY maven/scripts/*.sh /tmp
 
-ENV JBOSS_HOME /opt/jboss/eap
+RUN http_proxy=$HTTP_PROXY https_proxy=$HTTPS_PROXY no_proxy=$NO_PROXY sh /tmp/install_missing_packages.sh unzip=unzip groupadd=shadow-utils
+
+RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && chmod 755 /opt/jboss
 
 ADD maven/dist/jboss-eap.zip /opt/jboss
 

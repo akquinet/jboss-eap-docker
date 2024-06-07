@@ -120,7 +120,18 @@
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>bwb</id>
+
+            <properties>
+                <docker.buildArg.HTTP_PROXY>proxy.berlinwasser.de:8541</docker.buildArg.HTTP_PROXY>
+                <docker.buildArg.HTTPS_PROXY>proxy.berlinwasser.de:8541</docker.buildArg.HTTPS_PROXY>
+                <docker.buildArg.NO_PROXY>127.0.0.1,localhost,.bwb.de</docker.buildArg.NO_PROXY>
+            </properties>
+        </profile>
+    </profiles>
 </project>
