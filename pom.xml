@@ -127,6 +127,12 @@
         <profile>
             <id>bwb</id>
 
+            <activation>
+                <property>
+                    <name>env.http_proxy</name>
+                </property>
+            </activation>
+
             <properties>
                 <docker.buildArg.HTTP_PROXY>proxy.berlinwasser.de:8541</docker.buildArg.HTTP_PROXY>
                 <docker.buildArg.HTTPS_PROXY>proxy.berlinwasser.de:8541</docker.buildArg.HTTPS_PROXY>
