@@ -12,7 +12,7 @@ WORKDIR /opt/jboss
 
 COPY maven/scripts/*.sh /tmp
 
-RUN http_proxy=$HTTP_PROXY https_proxy=$HTTPS_PROXY no_proxy=$NO_PROXY sh /tmp/install_missing_packages.sh unzip=unzip groupadd=shadow-utils
+RUN http_proxy=$HTTP_PROXY https_proxy=$HTTPS_PROXY no_proxy=$NO_PROXY sh /tmp/install_missing_packages.sh unzip=unzip hostname=hostname groupadd=shadow-utils
 
 RUN groupadd -r jboss -g 1000 && useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss && chmod 755 /opt/jboss
 
