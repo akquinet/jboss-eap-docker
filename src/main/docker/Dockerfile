@@ -25,8 +25,8 @@ RUN cd /opt/jboss \
     && mv jboss-eap-$EAP_VERSION $JBOSS_HOME \
     && rm jboss-eap.zip \
     && chmod 755 ${JBOSS_HOME}/bin/*.sh \
-    && chown -R jboss:jboss ${JBOSS_HOME} \
-    && chmod -R g+rw ${JBOSS_HOME}
+    && chown -R jboss:jboss /opt/jboss \
+    && chmod -R g+rw /opt/jboss
 
 # Ensure signals are forwarded to the JVM process correctly for graceful shutdown
 ENV LAUNCH_JBOSS_IN_BACKGROUND true
