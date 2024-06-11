@@ -42,7 +42,10 @@ if [ "$EAP_XP_VERSION" != "none" ] && [ ! -f "$XP_MANAGER" ] ; then
   exit
 fi
 
-rm -rf "$JBOSS_HOME" "${JBOSS_DIR}" "${JBOSS_DIR}.zip"
+echo "REMOVING old files..."
+
+find . -type d -depth 1 -name jboss.eap\* -exec rm -rf \{\} \;
+rm -f "${JBOSS_DIR}.zip"
 
 echo "EXTRACT $JBOSS_HOME"
 
