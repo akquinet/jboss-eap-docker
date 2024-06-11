@@ -1,0 +1,4 @@
+/create-eap/*.zip
+/create-eap/*.jar
+/create-eap/jboss-eap*/*
+/create-eap/jboss-eap*

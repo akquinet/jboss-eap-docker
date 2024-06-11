@@ -1,35 +1,76 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -z "$1" ] ; then
-	echo "Usage: $0 <EAP-Version>, e.g. $0 jboss-eap-7.4.16"
+	echo "Usage: $0 <EAP-Version> [EAP-XP-Version], e.g. $0 jboss-eap-7.4.16 jboss-eap-xp-4.0.2"
 	exit
 else
 	EAP_VERSION=$1
 fi
 
+if [ -z "$2" ] ; then
+	EAP_XP_VERSION=none
+	echo No EAP XP patch supplied
+else
+	EAP_XP_VERSION=$2
+fi
+
+BASE_ZIP=jboss-eap-7.4.0.zip
+PATCH_ZIP=${EAP_VERSION}-patch.zip
+XP_PATCH_ZIP=${EAP_XP_VERSION}-patch.zip
+XP_MANAGER=${EAP_XP_VERSION}-manager.jar
 JBOSS_DIR=${EAP_VERSION}.GA
 
-unzip jboss-eap-7.4.0.zip
+export JBOSS_HOME=jboss-eap-7.4
 
-cd jboss-eap-7.4 || exit
+if [ ! -f "$BASE_ZIP" ] ; then
+  echo "Basic distribution $BASE_ZIP not found. https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=appplatform&downloadType=distributions&version=7.4"
+  exit
+fi
 
-echo APPLY Patch
+if [ ! -f "$PATCH_ZIP" ] ; then
+  echo "Patch file $PATCH_ZIP not found. Please download from https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?downloadType=patches&product=appplatform&version=7.4"
+  exit
+fi
 
-bin/jboss-cli.sh --echo-command "patch apply ../${EAP_VERSION}-patch.zip"
+if [ "$EAP_XP_VERSION" != "none" ] && [ ! -f "$XP_PATCH_ZIP" ] ; then
+  echo "EAP X patch file $XP_PATCH_ZIP not found. Please download from https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=appplatform.xp&downloadType=patches&version=4.0.0"
+  exit
+fi
 
-echo RENAME to ${JBOSS_DIR}
+if [ "$EAP_XP_VERSION" != "none" ] && [ ! -f "$XP_MANAGER" ] ; then
+  echo "EAP X manager $XP_MANAGER not found. Please download from https://access.redhat.com/jbossnetwork/restricted/listSoftware.html?product=appplatform.xp&downloadType=patches&version=4.0.0"
+  exit
+fi
 
-cd ..
-mv jboss-eap-7.4 ${JBOSS_DIR}
+rm -rf "$JBOSS_HOME" "${JBOSS_DIR}" "${JBOSS_DIR}.zip"
 
-echo STRIP ${JBOSS_DIR}
+echo "EXTRACT $JBOSS_HOME"
 
-./strip-patched-jboss.sh ${JBOSS_DIR}
+unzip -q "$BASE_ZIP"
 
-zip -r ${JBOSS_DIR}.zip ${JBOSS_DIR}
+echo "APPLY Patches for $EAP_VERSION"
 
-echo TEST built server ...
+$JBOSS_HOME/bin/jboss-cli.sh --echo-command "patch apply $PATCH_ZIP" || exit
 
-cd "${JBOSS_DIR}/bin" || exit
+if [ "$EAP_XP_VERSION" != "none" ] ; then
+  echo "SETUP XP Manager for $EAP_XP_VERSION"
+  java -jar "$XP_MANAGER" setup --jboss-home=./jboss-eap-7.4 --accept-support-policy || exit
 
-./standalone.sh -c standalone-full.xml
+  echo "APPLY XP Patches for $EAP_XP_VERSION"
+  java -jar "$XP_MANAGER" patch-apply --jboss-home=./jboss-eap-7.4 --patch="$XP_PATCH_ZIP" || exit
+#  bin/jboss-cli.sh --echo-command "patch apply ../$XP_PATCH_ZIP"
+fi
+
+echo "RENAME folder to ${JBOSS_DIR}"
+
+mv -v "$JBOSS_HOME" "${JBOSS_DIR}" || exit
+
+echo "STRIP ${JBOSS_DIR}"
+
+./strip-patched-jboss.sh "${JBOSS_DIR}"
+
+echo "ZIPPING ${JBOSS_DIR}"
+
+zip -qr "${JBOSS_DIR}.zip" "${JBOSS_DIR}"
+
+echo "You may now test the built server by running: cd ${JBOSS_DIR}/bin && ./standalone.sh -c standalone-full.xml"
