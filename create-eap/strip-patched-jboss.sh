@@ -88,10 +88,10 @@ echo "********** Cleaning up overlay files **********"
 
 delete=$(find "$JBOSS_DIR" -name \*"$MARKER")
 
-echo "Files: $delete"
+#echo "Files: $delete"
 
 # shellcheck disable=SC2086
-#rm -rf $delete
+rm -rf $delete
 
 chmod 755 "$JBOSS_DIR"/bin/*.sh
 rm -rf "$JBOSS_DIR/standalone/log" "$JBOSS_DIR/standalone/tmp" "$JBOSS_DIR/standalone/data" "$JBOSS_DIR/standalone/configuration/standalone_xml_history"
