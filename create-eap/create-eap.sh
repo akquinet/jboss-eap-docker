@@ -45,7 +45,7 @@ fi
 
 echo "REMOVING old files..."
 
-find . -type d -depth 1 -name jboss.eap\* -exec rm -rf \{\} \;
+find . -type d -depth 1 -name jboss-eap\* -exec rm -rf \{\} \;
 rm -f "${JBOSS_DIR}.zip"
 
 echo "EXTRACT $JBOSS_HOME"
