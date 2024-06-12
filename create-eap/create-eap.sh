@@ -63,7 +63,8 @@ if [ "$EAP_XP_VERSION" != "none" ] ; then
   echo "APPLY XP Patches for $EAP_XP_VERSION"
   java -jar "$XP_MANAGER" patch-apply --jboss-home=./jboss-eap-7.4 --patch="$XP_PATCH_ZIP" || exit
 
-  JBOSS_ZIP=${JBOSS_DIR}-xp.zip
+  JBOSS_DIR=${EAP_VERSION}.XP
+  JBOSS_ZIP=${JBOSS_DIR}.zip
 fi
 
 echo "RENAME folder to ${JBOSS_DIR}"
