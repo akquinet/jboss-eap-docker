@@ -8,6 +8,7 @@ else
 fi
 
 INSTALLATION_DIR="$JBOSS_DIR/.installation"
+MICROPROFILE_BASE_DIR="$JBOSS_DIR/modules/system/layers/microprofile"
 BUNDLE_BASE_DIR="$JBOSS_DIR/bundles/system/layers/base"
 MODULE_BASE_DIR="$JBOSS_DIR/modules/system/layers/base"
 CURRENT_VERSION=$(cat "$MODULE_BASE_DIR/.overlays/.overlays")
@@ -18,6 +19,10 @@ DIRS[0]=$MODULE_BASE_DIR
 
 if [ -x "$BUNDLE_BASE_DIR" ] ; then
 	DIRS[1]=$BUNDLE_BASE_DIR
+fi
+
+if [ -x "$MICROPROFILE_BASE_DIR" ] ; then
+	DIRS[2]=$MICROPROFILE_BASE_DIR
 fi
 
 if [ ! -x "$JBOSS_DIR" ] ; then
