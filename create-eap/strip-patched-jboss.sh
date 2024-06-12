@@ -14,6 +14,7 @@ fi
 
 INSTALLATION_DIR="$JBOSS_DIR/.installation"
 LAYERS_CONF="$JBOSS_DIR/modules/layers.conf"
+WELL_KNOWN="$JBOSS_DIR/.well-known"
 
 MODULE_BASE_DIR="$JBOSS_DIR/modules/system/layers/base"
 MICROPROFILE_BASE_DIR="$JBOSS_DIR/modules/system/layers/microprofile"
@@ -37,11 +38,15 @@ fi
 echo "********** Stripping $JBOSS_DIR with detected module paths ${DIRS[*]} ... **********"
 
 if [ -x "$LAYERS_CONF" ] ; then
-	mv "$LAYERS_CONF" "$LAYERS_CONF_DIR$MARKER"
+	mv "$LAYERS_CONF" "$LAYERS_CONF$MARKER"
 fi
 
 if [ -x "$INSTALLATION_DIR" ] ; then
 	mv "$INSTALLATION_DIR" "$INSTALLATION_DIR$MARKER"
+fi
+
+if [ -x "$WELL_KNOWN" ] ; then
+	mv "$WELL_KNOWN" "$WELL_KNOWN$MARKER"
 fi
 
 for dir in "${DIRS[@]}" ; do
@@ -83,8 +88,10 @@ echo "********** Cleaning up overlay files **********"
 
 delete=$(find "$JBOSS_DIR" -name \*"$MARKER")
 
+echo "Files: $delete"
+
 # shellcheck disable=SC2086
-rm -rf $delete
+#rm -rf $delete
 
 chmod 755 "$JBOSS_DIR"/bin/*.sh
-rm -rf "$JBOSS_DIR/standalone/log" "$JBOSS_DIR/standalone/tmp" "$JBOSS_DIR/standalone/data"
+rm -rf "$JBOSS_DIR/standalone/log" "$JBOSS_DIR/standalone/tmp" "$JBOSS_DIR/standalone/data" "$JBOSS_DIR/standalone/configuration/standalone_xml_history"
