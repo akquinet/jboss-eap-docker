@@ -7,38 +7,50 @@ else
 	JBOSS_DIR=$1
 fi
 
-INSTALLATION_DIR="$JBOSS_DIR/.installation"
-MICROPROFILE_BASE_DIR="$JBOSS_DIR/modules/system/layers/microprofile"
-BUNDLE_BASE_DIR="$JBOSS_DIR/bundles/system/layers/base"
-MODULE_BASE_DIR="$JBOSS_DIR/modules/system/layers/base"
-CURRENT_VERSION=$(cat "$MODULE_BASE_DIR/.overlays/.overlays")
-
-echo "Stripping $JBOSS_DIR ..."
-
-DIRS[0]=$MODULE_BASE_DIR
-
-if [ -x "$BUNDLE_BASE_DIR" ] ; then
-	DIRS[1]=$BUNDLE_BASE_DIR
-fi
-
-if [ -x "$MICROPROFILE_BASE_DIR" ] ; then
-	DIRS[2]=$MICROPROFILE_BASE_DIR
-fi
-
 if [ ! -x "$JBOSS_DIR" ] ; then
 	echo "$JBOSS_DIR does not exist"
 	exit
 fi
 
-echo "Current Version is $CURRENT_VERSION"
+INSTALLATION_DIR="$JBOSS_DIR/.installation"
+LAYERS_CONF="$JBOSS_DIR/modules/layers.conf"
+
+MODULE_BASE_DIR="$JBOSS_DIR/modules/system/layers/base"
+MICROPROFILE_BASE_DIR="$JBOSS_DIR/modules/system/layers/microprofile"
+BUNDLE_BASE_DIR="$JBOSS_DIR/bundles/system/layers/base"
+MARKER=XXX_DELETEME
+
+DIRS=()
+
+if [ -x "$MODULE_BASE_DIR" ] ; then
+  DIRS+=("$MODULE_BASE_DIR")
+fi
+
+if [ -x "$MICROPROFILE_BASE_DIR" ] ; then
+  DIRS+=("$MICROPROFILE_BASE_DIR")
+fi
+
+if [ -x "$BUNDLE_BASE_DIR" ] ; then
+  DIRS+=("$BUNDLE_BASE_DIR")
+fi
+
+echo "********** Stripping $JBOSS_DIR with detected module paths ${DIRS[*]} ... **********"
+
+if [ -x "$LAYERS_CONF" ] ; then
+	mv "$LAYERS_CONF" "$LAYERS_CONF_DIR$MARKER"
+fi
 
 if [ -x "$INSTALLATION_DIR" ] ; then
-	echo "Remove installation directory $INSTALLATION_DIR"
-	mv "$INSTALLATION_DIR" "$INSTALLATION_DIR"XXX_DELETEME
+	mv "$INSTALLATION_DIR" "$INSTALLATION_DIR$MARKER"
 fi
 
 for dir in "${DIRS[@]}" ; do
-	current_modules_dir=$dir/.overlays/$CURRENT_VERSION
+  current_version=$(cat "$dir/.overlays/.overlays")
+	current_modules_dir=$dir/.overlays/$current_version
+
+  echo "********** Current modules directory is $current_modules_dir **********"
+
+#  read -r -p "Continue (y/n)?"
 
 	# shellcheck disable=SC2044
 	for patchmoduledir in $(find "$current_modules_dir" -name module.xml); do
@@ -49,26 +61,30 @@ for dir in "${DIRS[@]}" ; do
 		
 		if [ -x "$old_module" ] ; then
 			if [ ! -x "$patched_module" ] ; then
-				echo "Patched module directory $patched_module does not exist. GIVING UP"
+				echo "Patched module directory $patched_module does not exist. GIVING UP!!"
 				exit
 			fi
 
-			mv "$old_module" "${old_module}XXX_DELETEME"
+			mv "$old_module" "${old_module}$MARKER"
 		else
-			echo "WARNING: Module directory $old_module does not exist. Will be CREATED"
+			echo "WARNING: Module directory $old_module does not exist. Will be created."
 			mkdir -p "${old_module%/main}"
 		fi
 		
-		echo "Replace $old_module with contents of $patched_module"
+		echo "Replacing $old_module with contents of $patched_module"
 		
 		cp -r "$patched_module" "$old_module"
 	done
 	
-	echo Cleaning up overlays
-	mv "$dir/.overlays" "$dir/OVERLAYSXXX_DELETEME"
+	mv "$dir/.overlays" "$dir/OVERLAYS$MARKER"
 done
 
-echo Cleaning up files
-rm -r $(find "$JBOSS_DIR" -name \*XXX_DELETEME)
+echo "********** Cleaning up overlay files **********"
+
+delete=$(find "$JBOSS_DIR" -name \*"$MARKER")
+
+# shellcheck disable=SC2086
+rm -rf $delete
+
 chmod 755 "$JBOSS_DIR"/bin/*.sh
 rm -rf "$JBOSS_DIR/standalone/log" "$JBOSS_DIR/standalone/tmp" "$JBOSS_DIR/standalone/data"
