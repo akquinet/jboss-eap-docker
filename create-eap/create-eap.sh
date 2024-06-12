@@ -19,6 +19,7 @@ PATCH_ZIP=${EAP_VERSION}-patch.zip
 XP_PATCH_ZIP=${EAP_XP_VERSION}-patch.zip
 XP_MANAGER=${EAP_XP_VERSION}-manager.jar
 JBOSS_DIR=${EAP_VERSION}.GA
+JBOSS_ZIP=${JBOSS_DIR}.zip
 
 export JBOSS_HOME=jboss-eap-7.4
 
@@ -61,7 +62,8 @@ if [ "$EAP_XP_VERSION" != "none" ] ; then
 
   echo "APPLY XP Patches for $EAP_XP_VERSION"
   java -jar "$XP_MANAGER" patch-apply --jboss-home=./jboss-eap-7.4 --patch="$XP_PATCH_ZIP" || exit
-#  bin/jboss-cli.sh --echo-command "patch apply ../$XP_PATCH_ZIP"
+
+  JBOSS_ZIP=${JBOSS_DIR}-xp.zip
 fi
 
 echo "RENAME folder to ${JBOSS_DIR}"
@@ -74,6 +76,6 @@ echo "STRIP ${JBOSS_DIR}"
 
 echo "ZIPPING ${JBOSS_DIR}"
 
-zip -qr "${JBOSS_DIR}.zip" "${JBOSS_DIR}"
+zip -qr "${JBOSS_ZIP}" "${JBOSS_DIR}"
 
 echo "You may now test the built server by running: cd ${JBOSS_DIR}/bin && ./standalone.sh -c standalone-full.xml"
