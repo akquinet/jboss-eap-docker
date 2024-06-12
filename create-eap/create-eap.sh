@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ] ; then
-	echo "Usage: $0 <EAP-Version> [EAP-XP-Version], e.g. $0 jboss-eap-7.4.16 jboss-eap-xp-4.0.2"
+	echo "Usage: $0 <EAP-Version> [EAP-XP-Version], e.g. $0 jboss-eap-7.4.17 jboss-eap-xp-4.0.2"
 	exit
 else
 	EAP_VERSION=$1
@@ -78,4 +78,4 @@ echo "ZIPPING ${JBOSS_DIR}"
 
 zip -qr "${JBOSS_ZIP}" "${JBOSS_DIR}"
 
-echo "You may now test the built server by running: cd ${JBOSS_DIR}/bin && ./standalone.sh -c standalone-full.xml"
+echo "You may now test the built server by running: cd ${JBOSS_DIR}/bin && ./standalone.sh -b 0.0.0.0"
